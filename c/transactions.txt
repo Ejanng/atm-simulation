@@ -1,0 +1,17 @@
+User: 18991 deposit a total amount of 200
+User: 18991 withdrew a total amount of 200
+User: 18991 transferred 500 to User: 24605
+User: 18991 deposit a total amount of 100
+User: 18991 deposit a total amount of 100
+User: 18991 withdrew a total amount of 200
+User: 18991 transferred 500 to User: 24605
+User: 18991 transferred 400 to User: 24605
+User: 18991 transferred 3000 to User: 24605
+User: 18991 transferred 400 to User: 24605
+User: 18991 transferred 400 to User: 24605
+User: 18991 transferred 300 to User: 24605
+User: 18991 transferred 400 to User: 24605
+User: 18991 transferred 300 to User: 24605
+User: 18991 transferred 300 to User: 24605
+User: 18991 transferred 300 to User: 24605
+User: 8887 transferred 5000 to User: 9167
