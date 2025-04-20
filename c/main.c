@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <time.h>
 
+#define MAX_USERS 100
 
 
 void clearScreen() {
@@ -182,9 +183,18 @@ void withdraw() {
     fclose(file);
 }
 
+typedef struct {
+    int id;
+    char username[50];
+    char password[50];
+    int banknote;
+} User;
+
+int *userIdPtr;
+
 void transfer() {
-    // Implementation for transferring money
     printf("Transfer function called.\n");
+
     int receiverId, transferAmount;
     printf("Enter the receiver's User ID: ");
     scanf("%d", &receiverId);
@@ -196,68 +206,59 @@ void transfer() {
         return;
     }
 
-    FILE *file = fopen("users.txt", "r+");
+    FILE *file = fopen("users.txt", "r");
     if (file == NULL) {
         printf("Error opening file.\n");
         return;
     }
 
-    char storedUsername[50], storedPassword[50];
-    int userId, banknote;
-    long pos;
-    int senderFound = 0, receiverFound = 0;
-    long senderPos = -1, receiverPos = -1;
-    int senderBanknote = 0, receiverBanknote = 0;
+    User users[MAX_USERS];
+    int userCount = 0;
 
-    // Locate sender and receiver in the file
-    while ((pos = ftell(file)) >= 0 && fscanf(file, "%d %s %s %d", &userId, storedUsername, storedPassword, &banknote) != EOF) {
-        if (userId == *userIdPtr) {
-            senderFound = 1;
-            senderPos = pos;
-            senderBanknote = banknote;
-        }
-        if (userId == receiverId) {
-            receiverFound = 1;
-            receiverPos = pos;
-            receiverBanknote = banknote;
-        }
-        if (senderFound && receiverFound) {
-            break;
-        }
+    // Step 1: Read all users into memory
+    while (fscanf(file, "%d %s %s %d", &users[userCount].id, users[userCount].username, users[userCount].password, &users[userCount].banknote) != EOF) {
+        userCount++;
+        if (userCount >= MAX_USERS) break;
     }
-
-    if (!senderFound) {
-        printf("Sender not found.\n");
-        fclose(file);
-        return;
-    }
-
-    if (!receiverFound) {
-        printf("Receiver not found.\n");
-        fclose(file);
-        return;
-    }
-
-    if (transferAmount > senderBanknote) {
-        printf("Insufficient balance for transfer.\n");
-        fclose(file);
-        return;
-    }
-
-    // Update sender's balance
-    fseek(file, senderPos, SEEK_SET);
-    senderBanknote -= transferAmount;
-    fprintf(file, "%d %s %s %d\n", *userIdPtr, storedUsername, storedPassword, senderBanknote);
-
-    // Update receiver's balance
-    fseek(file, receiverPos, SEEK_SET);
-    receiverBanknote += transferAmount;
-    fprintf(file, "%d %s %s %d\n", receiverId, storedUsername, storedPassword, receiverBanknote);
-
-    fflush(file);
     fclose(file);
 
-    // Log the transaction
+    // Step 2: Find sender and receiver
+    int senderIndex = -1, receiverIndex = -1;
+    for (int i = 0; i < userCount; i++) {
+        if (users[i].id == *userIdPtr) senderIndex = i;
+        if (users[i].id == receiverId) receiverIndex = i;
+    }
+
+    if (senderIndex == -1) {
+        printf("Sender not found.\n");
+        return;
+    }
+    if (receiverIndex == -1) {
+        printf("Receiver not found.\n");
+        return;
+    }
+    if (users[senderIndex].banknote < transferAmount) {
+        printf("Insufficient balance for transfer.\n");
+        return;
+    }
+
+    // Step 3: Transfer the money
+    users[senderIndex].banknote -= transferAmount;
+    users[receiverIndex].banknote += transferAmount;
+
+    // Step 4: Write updated users back to the file
+    file = fopen("users.txt", "w");
+    if (file == NULL) {
+        printf("Error writing to file.\n");
+        return;
+    }
+
+    for (int i = 0; i < userCount; i++) {
+        fprintf(file, "%d %s %s %d\n", users[i].id, users[i].username, users[i].password, users[i].banknote);
+    }
+    fclose(file);
+
+    // Step 5: Log the transaction
     FILE *transactionFile = fopen("transactions.txt", "a");
     if (transactionFile != NULL) {
         fprintf(transactionFile, "User: %d transferred %d to User: %d\n", *userIdPtr, transferAmount, receiverId);
@@ -266,7 +267,7 @@ void transfer() {
         printf("Error opening transaction file.\n");
     }
 
-    printf("Transfer successful! New balance: %d\n", senderBanknote);
+    printf("Transfer successful! Your new balance: %d\n", users[senderIndex].banknote);
 }
 
 void checkInfo() {
