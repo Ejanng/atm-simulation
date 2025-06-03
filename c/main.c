@@ -6,15 +6,68 @@
 
 #define MAX_USERS 100
 
-
 void clearScreen() {
     system("cls");
 }
 
-void createAccount() {\
+void adminCreate() {
+    // Implementation for creating an admin account
+    printf("Admin create function called.\n");
+    char adminUsername[50], adminPassword[50];
+    FILE *file = fopen("admin.txt", "a");
+    if (file == NULL) {
+        printf("Error opening file.\n");
+        return;
+    }
+
+    printf("Enter a username: ");
+    scanf("%49s", adminUsername);  // safer input
+    printf("Enter a password: ");
+    scanf("%49s", adminPassword);
+
+    if (fprintf(file, "%s %s\n", adminUsername, adminPassword) < 0) {
+        printf("Failed to write to file.\n");
+    }
+    fflush(file); // Force write to disk
+    fclose(file);
+
+    printf("Admin account created successfully!\n");
+}
+
+void adminLogin() {
+    // Implementation for admin login
+    printf("Admin login function called.\n");
+    char adminUsername[50], adminPassword[50];
+    int found = 0;
+
+    printf("Username: ");
+    scanf("%s", adminUsername);
+    printf("Password: ");
+    scanf("%s", adminPassword);
+
+    FILE *file = fopen("admin.txt", "r");
+    if (file == NULL) {
+        printf("Error opening file.\n");
+
+    }
+    
+    char storedUsername[50], storedPassword[50];
+    while (fscanf(file, "%s %s", storedUsername, storedPassword) != EOF) {
+        if (strcmp(adminUsername, storedUsername) == 0 && strcmp(adminPassword, storedPassword) == 0) {
+            found = 1;
+            break;
+        }
+    }
+
+    fclose(file);                       
+    
+
+}
+
+void createAccount() {
     int banknote = 10000;
     char username[50], password[50];
-    FILE *file = fopen("C:/Users/earlj/OneDrive/Documents/c/users.txt", "a");
+        FILE *file = fopen("users.txt", "a");
     if (file == NULL) {
         printf("Error opening file.\n");
         return;
@@ -44,6 +97,8 @@ int userId, banknote; // Declare as global variables
 int login() {
     char loginUsername[50], loginPassword[50];
     int found = 0;
+
+    printf("Login to your account\n");
 
     printf("Username: ");
     scanf("%s", loginUsername);
@@ -312,69 +367,150 @@ void displayWelcomeMessage() {
     printf("3. Exit\n");
 }
 
+// int sidemain() {
+//     int choice;
+//     clearScreen();
+//     displayWelcomeMessage();
+
+//     printf("Enter your choice: ");
+//     scanf("%d", &choice);
+
+//     switch (choice) { 
+//         case 1:
+//             // Register a new user
+//             clearScreen();
+//             createAccount();
+//             break;
+//         case 2:
+//             // Login
+//             clearScreen();
+//             printf("Login to your account\n");
+//             if (login()) {
+//                 int operation;
+//                 printf("Login successful!\n");
+
+//                 while (1) {
+//                     displayMenu();
+//                     printf("Enter : ");
+//                     scanf("%d", &operation);
+
+//                     switch (operation) {
+//                         case 1:
+//                             deposit();
+//                             break;
+//                         case 2:
+//                             withdraw();
+//                             break;
+//                         case 3:
+//                             transfer();
+//                             break;
+//                         case 4:
+//                             checkInfo();
+//                             break;
+//                         case 5:
+//                             viewTransactionHistory();
+//                             break;
+//                         case 6:
+//                             printf("Logging out...\n");
+//                             return 0; // Exit the loop and go back to the main menu
+//                         default:
+//                             printf("Invalid operation.\n");
+//                     }
+//                 }
+//             // Proceed to banking operations
+//             } else {
+//                 printf("Invalid username or password.\n");
+//             }
+//             break;
+//         case 3:
+//             // Exit
+//             return 0;
+//         case 4:
+//             // Admin login
+//             break;
+//         default:
+//             printf("Invalid choice\n");
+//             break;
+//     }
+
+//     return 0;
+    
+// }
+int boolend = 1;
+
 int main() {
     int choice;
-    clearScreen();
-    displayWelcomeMessage();
 
-    printf("Enter your choice: ");
-    scanf("%d", &choice);
+    while (1) {
+        clearScreen();
+        displayWelcomeMessage();
 
-    switch (choice) {
-        case 1:
-            // Register a new user
-            clearScreen();
-            createAccount();
-            break;
-        case 2:
-            // Login
-            clearScreen();
-            printf("Login to your account\n");
-            if (login()) {
-                int operation;
-                printf("Login successful!\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
 
-                while (1) {
-                    displayMenu();
-                    printf("Enter : ");
-                    scanf("%d", &operation);
+        switch(choice){
+            case 1:
+                // Register a new user
+                clearScreen();
+                createAccount();
+                break;
+            case 2:
+                // Login
+                clearScreen();
+                if (login()) {
+                    printf("Login successful!\n");
 
-                    switch (operation) {
-                        case 1:
-                            deposit();
-                            break;
-                        case 2:
-                            withdraw();
-                            break;
-                        case 3:
-                            transfer();
-                            break;
-                        case 4:
-                            checkInfo();
-                            break;
-                        case 5:
-                            viewTransactionHistory();
-                            break;
-                        case 6:
-                            printf("Logging out...\n");
-                            return 0; // Exit the loop and go back to the main menu
-                        default:
-                            printf("Invalid operation.\n");
+                    while(boolend) {
+                        displayMenu();
+                        printf("Enter : ");
+                        scanf("%d", &choice);
+
+                        switch (choice) {
+                            case 1:
+                                deposit();
+                                break;
+                            case 2:
+                                withdraw();
+                                break;
+                            case 3:
+                                transfer();
+                                break;
+                            case 4:
+                                checkInfo();        // add logic that user casn edit and delete their account
+                                break;
+                            case 5:
+                                viewTransactionHistory();
+                                break;
+                            case 6:
+                                printf("Logging out...\n");
+                                boolend = 0; // Exit the loop and go back to the main menu
+                                break;
+                            default:
+                                printf("Invalid operation.\n");
+                        }
                     }
+                } else {
+                    printf("Invalid username or password.\n");
                 }
-            // Proceed to banking operations
-            } else {
-                printf("Invalid username or password.\n");
-            }
-            break;
-        case 3:
-            // Exit
-            return 0;
-        default:
-            printf("Invalid choice\n");
-            break;
-    }
-
+                break;
+            case 3:
+                // Exit
+                printf("Exiting...\n");
+                return 0;
+            case 4:
+                // Admin login
+                clearScreen();
+                adminCreate();
+                break;
+            case 5:
+                // Admin login
+                clearScreen();
+                adminLogin();
+                break;
+            default:
+                printf("Invalid choice\n");
+                break;
+        }
+    } 
     return 0;
-    
 }
